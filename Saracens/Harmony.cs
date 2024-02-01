@@ -1,8 +1,6 @@
 ﻿// RimWorld.CompProperties_Reloadable
 using HarmonyLib;
-using RimWorld;
 using Saracens.Comps;
-using System;
 using Verse;
 
 namespace Saracens
@@ -17,19 +15,6 @@ namespace Saracens
             compMergable?.Divide(__instance);
         }
     }
-
-    [HarmonyPatch(typeof(PawnGenerator), nameof(PawnGenerator.IsPawnBeingGeneratedAndNotAllowsDead))]
-    class MakeCorpsePatch 
-    {
-        static bool Prefix(Pawn pawn, out bool __result)
-        {
-            var compCorpseDestroyerExisted = pawn.GetComp<CompCorpseDestroyer>() == null;
-
-            __result = compCorpseDestroyerExisted;
-            return compCorpseDestroyerExisted;
-        }
-    }
-
 
     [StaticConstructorOnStartup]
     public static class ModInitializer

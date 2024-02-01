@@ -1,6 +1,5 @@
 ﻿using RimWorld;
 using Saracens.Comps;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
@@ -48,7 +47,7 @@ namespace Saracens
         {
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
             yield return Toils_Interpersonal.WaitToBeAbleToInteract(pawn);
-            
+
             Toil dropFilth = ToilMaker.MakeToil("DropFilth");
             dropFilth.defaultCompleteMode = ToilCompleteMode.Instant;
             dropFilth.initAction = delegate

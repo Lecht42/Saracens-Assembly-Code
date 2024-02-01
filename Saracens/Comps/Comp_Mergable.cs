@@ -30,7 +30,7 @@ namespace Saracens.Comps
             }
         }
 
-        public void Divide(Pawn pawn) 
+        public void Divide(Pawn pawn)
         {
             if (CopiesOnDeath > 0 && pawn.ageTracker.CurLifeStageIndex > 0)
             {
