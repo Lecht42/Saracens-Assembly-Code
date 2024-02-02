@@ -46,7 +46,6 @@ namespace Saracens
         protected override IEnumerable<Toil> MakeNewToils()
         {
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
-            yield return Toils_Interpersonal.WaitToBeAbleToInteract(pawn);
 
             Toil dropFilth = ToilMaker.MakeToil("DropFilth");
             dropFilth.defaultCompleteMode = ToilCompleteMode.Instant;
