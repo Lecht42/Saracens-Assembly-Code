@@ -54,6 +54,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Comps\Comp_Mergable.cs" />
+    <Compile Include="Extensions\CanArriveAndDefend.cs" />
+    <Compile Include="Incidents\RaidStrategiesDefOf.cs" />
+    <Compile Include="Incidents\RaidStrategyWorker_DefendPoint.cs" />
     <Compile Include="Workers\DeathActionWorker_NoCorpseAndDrop.cs" />
     <Compile Include="Harmony.cs" />
     <Compile Include="Jobs\JobDefOf.cs" />
