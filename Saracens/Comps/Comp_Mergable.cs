@@ -1,5 +1,4 @@
-﻿using RimWorld;
-using Verse;
+﻿using Verse;
 using Verse.AI.Group;
 
 namespace Saracens.Comps
@@ -36,14 +35,16 @@ namespace Saracens.Comps
         {
             if (CopiesOnDeath > 0 && pawn.ageTracker.CurLifeStageIndex > 0)
             {
-                var request = new PawnGenerationRequest(pawn.kindDef, fixedBiologicalAge: pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath, fixedChronologicalAge: pawn.ageTracker.AgeChronologicalYears, faction: pawn.Faction);
+                var request = new PawnGenerationRequest(pawn.kindDef, 
+                    fixedBiologicalAge: pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath, 
+                    fixedChronologicalAge: pawn.ageTracker.AgeChronologicalYears, 
+                    faction: pawn.Faction);
 
                 for (int i = 0; i < CopiesOnDeath; i++)
                 {
                     Pawn genPawn = PawnGenerator.GeneratePawn(request);
                     GenSpawn.Spawn(genPawn, pawn.Position, pawn.Map);
                     PostPawnSpawn(genPawn);
-                    genPawn.Rotation = pawn.Rotation;
                 }
                 GenerateBlood();
             }
@@ -54,17 +55,15 @@ namespace Saracens.Comps
         {
             if (pawn.Spawned)
             {
-                Lord lord = null;
-                if (pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction).Any((Pawn p) => p != pawn))
-                {
-                    lord = ((Pawn)GenClosest.ClosestThing_Global(pawn.Position, pawn.Map.mapPawns.SpawnedPawnsInFaction(pawn.Faction), 99999f, (Thing p) => p != pawn && ((Pawn)p).GetLord() != null)).GetLord();
-                }
+                Lord lord = ((Pawn)parent).GetLord();
                 if (lord == null)
                 {
                     LordJob_DefendPoint lordJob = new LordJob_DefendPoint(pawn.Position);
                     lord = LordMaker.MakeNewLord(pawn.Faction, lordJob, Find.CurrentMap);
                 }
                 lord.AddPawn(pawn);
+                pawn.Rotation = ((Pawn)parent).Rotation;
+                pawn.inventory.DestroyAll();
             }
         }
     }
