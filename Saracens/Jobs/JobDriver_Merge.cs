@@ -44,13 +44,15 @@ namespace Saracens
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
+
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
+
+            var compMergable = pawn.GetComp<CompMergable>();
 
             Toil dropFilth = ToilMaker.MakeToil("DropFilth");
             dropFilth.defaultCompleteMode = ToilCompleteMode.Instant;
             dropFilth.initAction = delegate
             {
-                var compMergable = pawn.GetComp<CompMergable>();
                 compMergable.GenerateBlood();
             };
             yield return dropFilth;
@@ -61,9 +63,7 @@ namespace Saracens
             merge.defaultCompleteMode = ToilCompleteMode.Instant;
             merge.initAction = delegate
             {
-                pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + Victim.ageTracker.AgeBiologicalTicks);
-                Victim.inventory.innerContainer.TryTransferAllToContainer(pawn.inventory.innerContainer);
-                Victim.DeSpawn();
+                compMergable.Merge(Victim);
             };
             yield return merge;
         }

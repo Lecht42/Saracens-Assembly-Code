@@ -1,4 +1,5 @@
-﻿using Verse;
+﻿using System.Collections.Generic;
+using Verse;
 using Verse.AI.Group;
 
 namespace Saracens.Comps
@@ -35,9 +36,9 @@ namespace Saracens.Comps
         {
             if (CopiesOnDeath > 0 && pawn.ageTracker.CurLifeStageIndex > 0)
             {
-                var request = new PawnGenerationRequest(pawn.kindDef, 
-                    fixedBiologicalAge: pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath, 
-                    fixedChronologicalAge: pawn.ageTracker.AgeChronologicalYears, 
+                var request = new PawnGenerationRequest(pawn.kindDef,
+                    fixedBiologicalAge: pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath,
+                    fixedChronologicalAge: pawn.ageTracker.AgeChronologicalYears,
                     faction: pawn.Faction);
 
                 for (int i = 0; i < CopiesOnDeath; i++)
@@ -50,6 +51,14 @@ namespace Saracens.Comps
             }
         }
 
+        public void Merge(Pawn victim) 
+        {
+            var pawn = parent as Pawn;
+            pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + pawn.ageTracker.AgeBiologicalTicks);
+            FullHeal();
+            victim.inventory.innerContainer.TryTransferAllToContainer(pawn.inventory.innerContainer);
+            victim.DeSpawn();
+        }
 
         private void PostPawnSpawn(Pawn pawn)
         {
@@ -64,6 +73,16 @@ namespace Saracens.Comps
                 lord.AddPawn(pawn);
                 pawn.Rotation = ((Pawn)parent).Rotation;
                 pawn.inventory.DestroyAll();
+            }
+        }
+
+        private void FullHeal()
+        {
+            List<Hediff_Injury> resultHediffs = new List<Hediff_Injury>();
+            (parent as Pawn).health.hediffSet.GetHediffs(ref resultHediffs, (Hediff_Injury x) => x.CanHealNaturally() || x.CanHealFromTending());
+            foreach (var hediff in resultHediffs)
+            {
+                hediff.Heal(hediff.Severity); 
             }
         }
     }
