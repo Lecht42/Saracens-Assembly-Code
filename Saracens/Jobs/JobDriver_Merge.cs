@@ -62,6 +62,7 @@ namespace Saracens
             merge.initAction = delegate
             {
                 pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + Victim.ageTracker.AgeBiologicalTicks);
+                Victim.inventory.innerContainer.TryTransferAllToContainer(pawn.inventory.innerContainer);
                 Victim.DeSpawn();
             };
             yield return merge;
