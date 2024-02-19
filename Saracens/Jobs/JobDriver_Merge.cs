@@ -9,7 +9,9 @@ namespace Saracens
 
     public class JobGiver_Merge : ThinkNode_JobGiver
     {
-        public float MaxMergeDistance = 60f;
+        protected float maxMergeDistance = 60f;
+
+        public float MaxMergeDistance => maxMergeDistance;
 
         protected override Job TryGiveJob(Pawn pawn)
         {
