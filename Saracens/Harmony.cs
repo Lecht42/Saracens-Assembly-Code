@@ -16,6 +16,17 @@ namespace Saracens
         }
     }
 
+    [HarmonyPatch(typeof(Pawn_HealthTracker), "MakeDowned")]
+    class DownedPatch
+    {
+        static void Postfix(Pawn ___pawn)
+        {
+            var compMergable = ___pawn.GetComp<CompMergable>();
+
+            compMergable?.parent.Kill();
+        }
+    }
+
     [StaticConstructorOnStartup]
     public static class ModInitializer
     {
