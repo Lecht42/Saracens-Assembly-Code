@@ -47,6 +47,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>D:\Software\Steam\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="VFECore">
       <HintPath>F:\Documents\RimworldLibs\VFECore.dll</HintPath>
       <Private>False</Private>
@@ -57,6 +61,7 @@
     <Compile Include="Extensions\CanArriveAndDefend.cs" />
     <Compile Include="Incidents\RaidStrategiesDefOf.cs" />
     <Compile Include="Incidents\RaidStrategyWorker_DefendPoint.cs" />
+    <Compile Include="Jobs\ThinkNode_ConditionalFeelPain.cs" />
     <Compile Include="Workers\DeathActionWorker_NoCorpseAndDrop.cs" />
     <Compile Include="Harmony.cs" />
     <Compile Include="Jobs\JobDefOf.cs" />

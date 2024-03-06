@@ -1,12 +1,13 @@
-﻿using Saracens.Comps;
+﻿using RimWorld;
+using Saracens.Comps;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 using Verse.AI;
 
 namespace Saracens
 {
-
     public class JobGiver_Merge : ThinkNode_JobGiver
     {
         protected float maxMergeDistance = 60f;
@@ -37,6 +38,8 @@ namespace Saracens
 
     public class JobDriver_Merge : JobDriver
     {
+        public static readonly Texture2D moteIcon = ContentFinder<Texture2D>.Get("Animal/BigIfrit_south");
+
         protected Pawn Victim => (Pawn)pawn.CurJob.targetA.Thing;
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
@@ -46,27 +49,22 @@ namespace Saracens
 
         protected override IEnumerable<Toil> MakeNewToils()
         {
-
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
 
             var compMergable = pawn.GetComp<CompMergable>();
 
-            Toil dropFilth = ToilMaker.MakeToil("DropFilth");
-            dropFilth.defaultCompleteMode = ToilCompleteMode.Instant;
-            dropFilth.initAction = delegate
-            {
-                compMergable.GenerateBlood();
-            };
-            yield return dropFilth;
-
             yield return Toils_Effects.MakeSound(pawn.def.soundInteract);
 
-            Toil merge = ToilMaker.MakeToil("Merge");
-            merge.defaultCompleteMode = ToilCompleteMode.Instant;
+            Toil merge = ToilMaker.MakeToil("MakeNewToils");
+            merge.defaultCompleteMode = ToilCompleteMode.Delay;
+            merge.defaultDuration = 760;
             merge.initAction = delegate
             {
+                MoteMaker.MakeSpeechBubble(pawn, moteIcon);
+                compMergable.GenerateBlood();
                 compMergable.Merge(Victim);
             };
+
             yield return merge;
         }
     }

@@ -1,5 +1,4 @@
-﻿// RimWorld.CompProperties_Reloadable
-using HarmonyLib;
+﻿using HarmonyLib;
 using Saracens.Comps;
 using Verse;
 

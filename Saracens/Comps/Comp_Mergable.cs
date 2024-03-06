@@ -57,7 +57,7 @@ namespace Saracens.Comps
             pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + pawn.ageTracker.AgeBiologicalTicks);
             FullHeal();
             victim.inventory.innerContainer.TryTransferAllToContainer(pawn.inventory.innerContainer);
-            victim.DeSpawn();
+            victim.Destroy(DestroyMode.Vanish);
         }
 
         private void PostPawnSpawn(Pawn pawn)
