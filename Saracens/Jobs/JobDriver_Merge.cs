@@ -38,7 +38,6 @@ namespace Saracens
 
     public class JobDriver_Merge : JobDriver
     {
-        public static readonly Texture2D moteIcon = ContentFinder<Texture2D>.Get("Animal/BigIfrit_south");
 
         protected Pawn Victim => (Pawn)pawn.CurJob.targetA.Thing;
 
@@ -51,17 +50,13 @@ namespace Saracens
         {
             yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch);
 
-            var compMergable = pawn.GetComp<CompMergable>();
-
             yield return Toils_Effects.MakeSound(pawn.def.soundInteract);
 
             Toil merge = ToilMaker.MakeToil("MakeNewToils");
-            merge.defaultCompleteMode = ToilCompleteMode.Delay;
-            merge.defaultDuration = 760;
+            merge.defaultCompleteMode = ToilCompleteMode.Instant;
             merge.initAction = delegate
             {
-                MoteMaker.MakeSpeechBubble(pawn, moteIcon);
-                compMergable.GenerateBlood();
+                var compMergable = pawn.GetComp<CompMergable>();
                 compMergable.Merge(Victim);
             };
 

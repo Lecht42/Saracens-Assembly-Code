@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using RimWorld;
+using System;
+using System.Collections.Generic;
+using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 
@@ -10,6 +13,10 @@ namespace Saracens.Comps
 
         public IntRange bloodDuringMerge = IntRange.one;
 
+        public bool stunOnMerge = true;
+
+        public int stunDuration = 280;
+
         public CompProperties_Mergable()
         {
             compClass = typeof(CompMergable);
@@ -18,13 +25,21 @@ namespace Saracens.Comps
 
     public class CompMergable : ThingComp
     {
+        public static readonly Texture2D moteIcon = ContentFinder<Texture2D>.Get("Animal/BigIfrit_south");
+
         public CompProperties_Mergable Props => props as CompProperties_Mergable;
 
         public int CopiesOnDeath => Props.copiesOnDeath;
 
         public IntRange BloodNumberRange => Props.bloodDuringMerge;
 
-        public void GenerateBlood()
+        public bool StunOnMerge => Props.stunOnMerge;
+
+        public int StunDuration => Props.stunDuration;
+
+        public int StugDuration => (int)Math.Round(Props.stunDuration * 1.4f);
+
+        private void GenerateBlood()
         {
             for (int i = 0; i < Rand.Range(BloodNumberRange.min, BloodNumberRange.max) * (parent as Pawn).BodySize; i++)
             {
@@ -55,7 +70,13 @@ namespace Saracens.Comps
         {
             var pawn = parent as Pawn;
             pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + pawn.ageTracker.AgeBiologicalTicks);
+            MoteMaker.MakeSpeechBubble(pawn, moteIcon);
+            GenerateBlood();
             FullHeal();
+            if (StunOnMerge)
+            {
+                pawn.stances.stunner.StunFor(StunDuration, pawn, false, true);
+            }
             victim.inventory.innerContainer.TryTransferAllToContainer(pawn.inventory.innerContainer);
             victim.Destroy(DestroyMode.Vanish);
         }
@@ -72,6 +93,10 @@ namespace Saracens.Comps
                 }
                 lord.AddPawn(pawn);
                 pawn.Rotation = ((Pawn)parent).Rotation;
+                if (StunOnMerge)
+                {
+                    pawn.stances.stagger.StaggerFor(StugDuration);
+                }
                 pawn.inventory.DestroyAll();
             }
         }
