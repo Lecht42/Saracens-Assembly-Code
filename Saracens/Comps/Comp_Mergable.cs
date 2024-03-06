@@ -29,87 +29,83 @@ namespace Saracens.Comps
 
         public CompProperties_Mergable Props => props as CompProperties_Mergable;
 
-        public Pawn Pawn => parent as Pawn;
+        public Pawn Parent => parent as Pawn;
 
         public int CopiesOnDeath => Props.copiesOnDeath;
 
         public bool StunOnMerge => Props.stunOnMerge;
 
-        public int BloodNumber => (int)(Rand.Range(Props.bloodDuringMerge.min, Props.bloodDuringMerge.max) * Pawn.BodySize);
+        public int BloodNumber => (int)(Rand.Range(Props.bloodDuringMerge.min, Props.bloodDuringMerge.max) * Parent.BodySize);
 
-        public int StunDuration => (int)(Props.stunDuration * Pawn.BodySize);
+        public int StunDuration => (int)(Props.stunDuration * Parent.BodySize);
 
-        public int StugDuration => (int)Math.Round(Props.stunDuration * 1.4f * Pawn.BodySize);
+        public int StugDuration => (int)Math.Round(Props.stunDuration * 1.4f * Parent.BodySize);
 
-        private void GenerateBlood()
+        private void DropBlood()
         {
             for (int i = 0; i < BloodNumber; i++)
             {
-                (parent as Pawn).health.DropBloodFilth();
+                Parent.health.DropBloodFilth();
             }
         }
 
         public void Divide()
         {
-            if (CopiesOnDeath > 0 && Pawn.ageTracker.CurLifeStageIndex > 0)
+            if (CopiesOnDeath > 0 && Parent.ageTracker.CurLifeStageIndex > 0)
             {
-                var request = new PawnGenerationRequest(Pawn.kindDef,
-                    fixedBiologicalAge: Pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath,
-                    fixedChronologicalAge: Pawn.ageTracker.AgeChronologicalYears,
-                    faction: Pawn.Faction);
+                var request = new PawnGenerationRequest(Parent.kindDef,
+                    fixedBiologicalAge: Parent.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath,
+                    fixedChronologicalAge: Parent.ageTracker.AgeChronologicalYears,
+                    faction: Parent.Faction);
+
+                void PostSpawn(Pawn pawn)
+                {
+                    Lord lord = Parent.GetLord();
+                    if (lord == null)
+                    {
+                        LordJob_DefendPoint lordJob = new LordJob_DefendPoint(pawn.Position);
+                        lord = LordMaker.MakeNewLord(pawn.Faction, lordJob, Find.CurrentMap);
+                    }
+                    lord.AddPawn(pawn);
+                    pawn.Rotation = Parent.Rotation;
+                    if (StunOnMerge)
+                    {
+                        pawn.stances.stagger.StaggerFor(StugDuration);
+                    }
+                    pawn.inventory.DestroyAll();
+                }
 
                 for (int i = 0; i < CopiesOnDeath; i++)
                 {
-                    Pawn genPawn = PawnGenerator.GeneratePawn(request);
-                    GenSpawn.Spawn(genPawn, Pawn.Position.RandomAdjacentCellCardinal(), Pawn.Map);
-                    PostPawnSpawn(genPawn);
+                    var genPawn = PawnGenerator.GeneratePawn(request);
+                    GenSpawn.Spawn(genPawn, Parent.Position.RandomAdjacentCellCardinal(), Parent.Map);
+                    PostSpawn(genPawn); 
                 }
-                GenerateBlood();
+                DropBlood();
             }
         }
 
-        public void Merge(Pawn victim) 
+        public void Merge(Pawn victim)
         {
-            var pawn = parent as Pawn;
-            pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + pawn.ageTracker.AgeBiologicalTicks);
-            MoteMaker.MakeSpeechBubble(pawn, moteIcon);
-            GenerateBlood();
+            Parent.ageTracker.DebugSetAge(Parent.ageTracker.AgeBiologicalTicks + Parent.ageTracker.AgeBiologicalTicks);
+            MoteMaker.MakeSpeechBubble(Parent, moteIcon);
+            DropBlood();
             Heal();
             if (StunOnMerge)
             {
-                pawn.stances.stunner.StunFor(StunDuration, pawn, false, true);
+                Parent.stances.stunner.StunFor(StunDuration, Parent, false, true);
             }
-            victim.inventory.innerContainer.TryTransferAllToContainer(pawn.inventory.innerContainer);
+            victim.inventory.innerContainer.TryTransferAllToContainer(Parent.inventory.innerContainer);
             victim.Destroy(DestroyMode.Vanish);
-        }
-
-        private void PostPawnSpawn(Pawn pawn)
-        {
-            if (pawn.Spawned)
-            {
-                Lord lord = ((Pawn)parent).GetLord();
-                if (lord == null)
-                {
-                    LordJob_DefendPoint lordJob = new LordJob_DefendPoint(pawn.Position);
-                    lord = LordMaker.MakeNewLord(pawn.Faction, lordJob, Find.CurrentMap);
-                }
-                lord.AddPawn(pawn);
-                pawn.Rotation = ((Pawn)parent).Rotation;
-                if (StunOnMerge)
-                {
-                    pawn.stances.stagger.StaggerFor(StugDuration);
-                }
-                pawn.inventory.DestroyAll();
-            }
         }
 
         private void Heal()
         {
             List<Hediff_Injury> resultHediffs = new List<Hediff_Injury>();
-            (parent as Pawn).health.hediffSet.GetHediffs(ref resultHediffs, (Hediff_Injury x) => x.CanHealNaturally() || x.CanHealFromTending());
+            Parent.health.hediffSet.GetHediffs(ref resultHediffs, (Hediff_Injury x) => x.CanHealNaturally() || x.CanHealFromTending());
             foreach (var hediff in resultHediffs)
             {
-                hediff.Heal(hediff.Severity / CopiesOnDeath); 
+                hediff.Heal(hediff.Severity);
             }
         }
     }
