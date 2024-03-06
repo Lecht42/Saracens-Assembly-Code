@@ -5,7 +5,7 @@ namespace Saracens.Jobs
 {
     public class ThinkNode_ConditionalFeelPain : ThinkNode_Conditional
     {
-        protected float painThreeshold = 0.2f;
+        public float painThreeshold = 0.2f;
 
         public float PainThreeshold => painThreeshold;
 

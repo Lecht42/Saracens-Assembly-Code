@@ -15,7 +15,7 @@ namespace Saracens.Comps
 
         public bool stunOnMerge = true;
 
-        public int stunDuration = 280;
+        public int stunDuration = 80;
 
         public CompProperties_Mergable()
         {
@@ -29,37 +29,39 @@ namespace Saracens.Comps
 
         public CompProperties_Mergable Props => props as CompProperties_Mergable;
 
-        public int CopiesOnDeath => Props.copiesOnDeath;
+        public Pawn Pawn => parent as Pawn;
 
-        public IntRange BloodNumberRange => Props.bloodDuringMerge;
+        public int CopiesOnDeath => Props.copiesOnDeath;
 
         public bool StunOnMerge => Props.stunOnMerge;
 
-        public int StunDuration => Props.stunDuration;
+        public int BloodNumber => (int)(Rand.Range(Props.bloodDuringMerge.min, Props.bloodDuringMerge.max) * Pawn.BodySize);
 
-        public int StugDuration => (int)Math.Round(Props.stunDuration * 1.4f);
+        public int StunDuration => (int)(Props.stunDuration * Pawn.BodySize);
+
+        public int StugDuration => (int)Math.Round(Props.stunDuration * 1.4f * Pawn.BodySize);
 
         private void GenerateBlood()
         {
-            for (int i = 0; i < Rand.Range(BloodNumberRange.min, BloodNumberRange.max) * (parent as Pawn).BodySize; i++)
+            for (int i = 0; i < BloodNumber; i++)
             {
                 (parent as Pawn).health.DropBloodFilth();
             }
         }
 
-        public void Divide(Pawn pawn)
+        public void Divide()
         {
-            if (CopiesOnDeath > 0 && pawn.ageTracker.CurLifeStageIndex > 0)
+            if (CopiesOnDeath > 0 && Pawn.ageTracker.CurLifeStageIndex > 0)
             {
-                var request = new PawnGenerationRequest(pawn.kindDef,
-                    fixedBiologicalAge: pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath,
-                    fixedChronologicalAge: pawn.ageTracker.AgeChronologicalYears,
-                    faction: pawn.Faction);
+                var request = new PawnGenerationRequest(Pawn.kindDef,
+                    fixedBiologicalAge: Pawn.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath,
+                    fixedChronologicalAge: Pawn.ageTracker.AgeChronologicalYears,
+                    faction: Pawn.Faction);
 
                 for (int i = 0; i < CopiesOnDeath; i++)
                 {
                     Pawn genPawn = PawnGenerator.GeneratePawn(request);
-                    GenSpawn.Spawn(genPawn, pawn.Position, pawn.Map);
+                    GenSpawn.Spawn(genPawn, Pawn.Position.RandomAdjacentCellCardinal(), Pawn.Map);
                     PostPawnSpawn(genPawn);
                 }
                 GenerateBlood();
@@ -72,7 +74,7 @@ namespace Saracens.Comps
             pawn.ageTracker.DebugSetAge(pawn.ageTracker.AgeBiologicalTicks + pawn.ageTracker.AgeBiologicalTicks);
             MoteMaker.MakeSpeechBubble(pawn, moteIcon);
             GenerateBlood();
-            FullHeal();
+            Heal();
             if (StunOnMerge)
             {
                 pawn.stances.stunner.StunFor(StunDuration, pawn, false, true);
@@ -101,13 +103,13 @@ namespace Saracens.Comps
             }
         }
 
-        private void FullHeal()
+        private void Heal()
         {
             List<Hediff_Injury> resultHediffs = new List<Hediff_Injury>();
             (parent as Pawn).health.hediffSet.GetHediffs(ref resultHediffs, (Hediff_Injury x) => x.CanHealNaturally() || x.CanHealFromTending());
             foreach (var hediff in resultHediffs)
             {
-                hediff.Heal(hediff.Severity); 
+                hediff.Heal(hediff.Severity / CopiesOnDeath); 
             }
         }
     }

@@ -11,7 +11,7 @@ namespace Saracens
         {
             var compMergable = __instance.GetComp<CompMergable>();
 
-            compMergable?.Divide(__instance);
+            compMergable?.Divide();
         }
     }
 
