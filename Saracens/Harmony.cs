@@ -9,8 +9,9 @@ namespace Saracens
     {
         static void Prefix(Pawn __instance)
         {
-            var compMergable = __instance.GetComp<CompMergable>();
+            if (__instance.Downed) return;
 
+            var compMergable = __instance.GetComp<CompMergable>();
             compMergable?.Divide();
         }
     }
@@ -18,11 +19,18 @@ namespace Saracens
     [HarmonyPatch(typeof(Pawn_HealthTracker), "MakeDowned")]
     class DownedPatch
     {
-        static void Postfix(Pawn ___pawn)
+        static void Prefix(Pawn ___pawn, out CompMergable __state)
         {
-            var compMergable = ___pawn.GetComp<CompMergable>();
+            __state = ___pawn.GetComp<CompMergable>();
 
-            compMergable?.parent.Kill();
+            __state?.Divide();
+        }
+
+        static void Postfix(Pawn ___pawn, CompMergable __state)
+        {
+            if (__state == null) return;
+
+            __state?.parent.Kill();
         }
     }
 
