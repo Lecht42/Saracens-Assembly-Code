@@ -1,5 +1,4 @@
 ﻿using RimWorld;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
@@ -39,7 +38,7 @@ namespace Saracens.Comps
 
         public int StunDuration => (int)(Props.stunDuration * Parent.BodySize);
 
-        public int StugDuration => (int)Math.Round(Props.stunDuration * 1.4f * Parent.BodySize);
+        public int StugDuration => StunDuration << 1;
 
         private void DropBlood()
         {
@@ -51,38 +50,38 @@ namespace Saracens.Comps
 
         public void Divide()
         {
-            if (CopiesOnDeath > 0 && Parent.ageTracker.CurLifeStageIndex > 0)
+            if (CopiesOnDeath > 0 && Parent.ageTracker.CurLifeStageIndex > 0 && !Parent.Downed)
             {
                 var request = new PawnGenerationRequest(Parent.kindDef,
                     fixedBiologicalAge: Parent.ageTracker.AgeBiologicalYearsFloat / CopiesOnDeath,
                     fixedChronologicalAge: Parent.ageTracker.AgeChronologicalYears,
                     faction: Parent.Faction);
 
-                void PostSpawn(Pawn pawn)
-                {
-                    Lord lord = Parent.GetLord();
-                    if (lord == null)
-                    {
-                        LordJob_DefendPoint lordJob = new LordJob_DefendPoint(pawn.Position);
-                        lord = LordMaker.MakeNewLord(pawn.Faction, lordJob, Find.CurrentMap);
-                    }
-                    lord.AddPawn(pawn);
-                    pawn.Rotation = Parent.Rotation;
-                    if (StunOnMerge)
-                    {
-                        pawn.stances.stagger.StaggerFor(StugDuration);
-                    }
-                    pawn.inventory.DestroyAll();
-                }
-
                 for (int i = 0; i < CopiesOnDeath; i++)
                 {
                     var genPawn = PawnGenerator.GeneratePawn(request);
                     GenSpawn.Spawn(genPawn, Parent.Position.RandomAdjacentCellCardinal(), Parent.Map);
-                    PostSpawn(genPawn); 
+                    PostSpawn(genPawn);
                 }
                 DropBlood();
             }
+        }
+
+        private void PostSpawn(Pawn pawn)
+        {
+            Lord lord = Parent.GetLord();
+            if (lord == null)
+            {
+                LordJob_DefendPoint lordJob = new LordJob_DefendPoint(pawn.Position);
+                lord = LordMaker.MakeNewLord(pawn.Faction, lordJob, Find.CurrentMap);
+            }
+            lord.AddPawn(pawn);
+            pawn.Rotation = Parent.Rotation;
+            if (StunOnMerge)
+            {
+                pawn.stances.stagger.StaggerFor(StugDuration);
+            }
+            pawn.inventory.DestroyAll();
         }
 
         public void Merge(Pawn victim)
