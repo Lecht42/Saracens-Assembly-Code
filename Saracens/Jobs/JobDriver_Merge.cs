@@ -21,7 +21,7 @@ namespace Saracens
                   && !pawn.ageTracker.Adult
                   && !p.ageTracker.Adult
                   && p.Position.InHorDistOf(pawn.Position, MaxMergeDistance)
-                  && pawn.ageTracker.AgeBiologicalTicks <= p.ageTracker.AgeBiologicalTicks
+                  && pawn.ageTracker.AgeBiologicalYears <= p.ageTracker.AgeBiologicalYears
                   select p).TryRandomElement(out var result))
             {
                 return null;
@@ -41,7 +41,7 @@ namespace Saracens
 
         public override bool TryMakePreToilReservations(bool errorOnFailed)
         {
-            return pawn.Reserve(Victim, job, 1, -1, null, errorOnFailed);
+            return pawn.Reserve(Victim, job, 1, -1, null, false);
         }
 
         protected override IEnumerable<Toil> MakeNewToils()
