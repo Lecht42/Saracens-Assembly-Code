@@ -57,11 +57,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Comps\CompMergable.cs" />
     <Compile Include="Comps\Comp_Mergable.cs" />
     <Compile Include="Extensions\CanArriveAndDefend.cs" />
     <Compile Include="Incidents\RaidStrategiesDefOf.cs" />
     <Compile Include="Incidents\RaidStrategyWorker_DefendPoint.cs" />
-    <Compile Include="Jobs\ThinkNode_ConditionalFeelPain.cs" />
+    <Compile Include="Jobs\JobGiver_Merge.cs" />
+    <Compile Include="Jobs\ThinkNodes\ThinkNode_ConditionalHasMergable.cs" />
+    <Compile Include="Jobs\ThinkNodes\ThinkNode_ConditionalFeelPain.cs" />
     <Compile Include="Workers\DeathActionWorker_NoCorpseAndDrop.cs" />
     <Compile Include="Harmony.cs" />
     <Compile Include="Jobs\JobDefOf.cs" />
